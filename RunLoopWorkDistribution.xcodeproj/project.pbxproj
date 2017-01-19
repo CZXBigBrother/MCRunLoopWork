@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		504980B21BB27D190046A918 /* ViewControllerSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504980B11BB27D190046A918 /* ViewControllerSwift.swift */; };
+		41138F6E1E30AAFF007E07AC /* MCRunloopWork.m in Sources */ = {isa = PBXBuildFile; fileRef = 41138F6D1E30AAFF007E07AC /* MCRunloopWork.m */; };
 		504980B51BB29E5B0046A918 /* DWURunLoopWorkDistribution.m in Sources */ = {isa = PBXBuildFile; fileRef = 504980B31BB29E5B0046A918 /* DWURunLoopWorkDistribution.m */; };
 		506A0C7F1BAD09600084E276 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 506A0C7E1BAD09600084E276 /* main.m */; };
 		506A0C821BAD09600084E276 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 506A0C811BAD09600084E276 /* AppDelegate.m */; };
@@ -17,8 +17,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		41138F6C1E30AAFF007E07AC /* MCRunloopWork.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRunloopWork.h; sourceTree = "<group>"; };
+		41138F6D1E30AAFF007E07AC /* MCRunloopWork.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCRunloopWork.m; sourceTree = "<group>"; };
 		504980B01BB27D190046A918 /* RunLoopWorkDistribution-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RunLoopWorkDistribution-Bridging-Header.h"; sourceTree = "<group>"; };
-		504980B11BB27D190046A918 /* ViewControllerSwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewControllerSwift.swift; sourceTree = "<group>"; };
 		504980B31BB29E5B0046A918 /* DWURunLoopWorkDistribution.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DWURunLoopWorkDistribution.m; path = DWURunLoopWorkDistribution/DWURunLoopWorkDistribution.m; sourceTree = "<group>"; };
 		504980B41BB29E5B0046A918 /* DWURunLoopWorkDistribution.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DWURunLoopWorkDistribution.h; path = DWURunLoopWorkDistribution/DWURunLoopWorkDistribution.h; sourceTree = "<group>"; };
 		506A0C7A1BAD09600084E276 /* RunLoopWorkDistribution.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RunLoopWorkDistribution.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -62,6 +63,8 @@
 		506A0C7C1BAD09600084E276 /* RunLoopWorkDistribution */ = {
 			isa = PBXGroup;
 			children = (
+				41138F6C1E30AAFF007E07AC /* MCRunloopWork.h */,
+				41138F6D1E30AAFF007E07AC /* MCRunloopWork.m */,
 				504980B31BB29E5B0046A918 /* DWURunLoopWorkDistribution.m */,
 				504980B41BB29E5B0046A918 /* DWURunLoopWorkDistribution.h */,
 				506A0C941BAD717A0084E276 /* spaceship.jpg */,
@@ -72,7 +75,6 @@
 				506A0C891BAD09600084E276 /* Assets.xcassets */,
 				506A0C8E1BAD09600084E276 /* Info.plist */,
 				506A0C7D1BAD09600084E276 /* Supporting Files */,
-				504980B11BB27D190046A918 /* ViewControllerSwift.swift */,
 				504980B01BB27D190046A918 /* RunLoopWorkDistribution-Bridging-Header.h */,
 			);
 			path = RunLoopWorkDistribution;
@@ -158,8 +160,8 @@
 			files = (
 				506A0C851BAD09600084E276 /* ViewController.m in Sources */,
 				504980B51BB29E5B0046A918 /* DWURunLoopWorkDistribution.m in Sources */,
+				41138F6E1E30AAFF007E07AC /* MCRunloopWork.m in Sources */,
 				506A0C821BAD09600084E276 /* AppDelegate.m in Sources */,
-				504980B21BB27D190046A918 /* ViewControllerSwift.swift in Sources */,
 				506A0C7F1BAD09600084E276 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

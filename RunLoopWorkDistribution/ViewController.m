@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "DWURunLoopWorkDistribution.h"
+#import "MCRunloopWork.h"
 
 static NSString *IDENTIFIER = @"IDENTIFIER";
 
@@ -20,7 +21,67 @@ static CGFloat CELL_HEIGHT = 135.f;
 @end
 
 @implementation ViewController
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view, typically from a nib.
+    [[MCRunloopWork sharedRunLoopWork]start];
+    [self.exampleTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:IDENTIFIER];
+    
+//    DWURunLoopWorkDistribution.h 是大神原来写的类
+//    MCRunloopWork.h 这是我优化之后的类,添加了一些方法和配置选项,方便在更多场景下使用
+}
+- (void)loadView {
+    self.view = [UIView new];
+    self.exampleTableView = [UITableView new];
+    self.exampleTableView.delegate = self;
+    self.exampleTableView.dataSource = self;
+    [self.view addSubview:self.exampleTableView];
+    
+    UIButton * stopBtn = [[UIButton alloc]initWithFrame:(CGRect){CGPointZero,{60,60}}];
+    [stopBtn addTarget:self action:@selector(stopRunloop) forControlEvents:UIControlEventTouchUpInside];
+    [stopBtn setTitle:@"stop" forState:UIControlStateNormal];
+    [stopBtn setBackgroundColor:[UIColor redColor]];
+    [self.view addSubview:stopBtn];
+}
+- (void)stopRunloop {
+    [[MCRunloopWork sharedRunLoopWork]stop];
+}
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    self.exampleTableView.frame = self.view.bounds;
+}
 
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:IDENTIFIER];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    cell.currentIndexPath = indexPath;
+    [ViewController task_5:cell indexPath:indexPath];
+    [ViewController task_1:cell indexPath:indexPath];
+    //任务通过block添加到队列
+    [[MCRunloopWork sharedRunLoopWork] addTask:^BOOL(void) {
+        if (![cell.currentIndexPath isEqual:indexPath]) {
+            return NO;
+        }
+        [ViewController task_2:cell indexPath:indexPath];
+        return YES;
+    } withKey:indexPath];
+    [[MCRunloopWork sharedRunLoopWork] addTask:^BOOL(void) {
+        if (![cell.currentIndexPath isEqual:indexPath]) {
+            return NO;
+        }
+        [ViewController task_3:cell indexPath:indexPath];
+        return YES;
+    } withKey:indexPath];
+    [[MCRunloopWork sharedRunLoopWork] addTask:^BOOL(void) {
+        if (![cell.currentIndexPath isEqual:indexPath]) {
+            return NO;
+        }
+        [ViewController task_4:cell indexPath:indexPath];
+        return YES;
+    } withKey:indexPath];
+    return cell;
+}
 + (void)task_5:(UITableViewCell *)cell indexPath:(NSIndexPath *)indexPath {
     for (NSInteger i = 1; i <= 5; i++) {
         [[cell.contentView viewWithTag:i] removeFromSuperview];
@@ -89,65 +150,10 @@ static CGFloat CELL_HEIGHT = 135.f;
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return 399;
 }
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:IDENTIFIER];
-    cell.selectionStyle = UITableViewCellSelectionStyleNone;
-    cell.currentIndexPath = indexPath;
-    [ViewController task_5:cell indexPath:indexPath];
-    [ViewController task_1:cell indexPath:indexPath];
-    //任务通过block添加到队列
-    [[DWURunLoopWorkDistribution sharedRunLoopWorkDistribution] addTask:^BOOL(void) {
-        if (![cell.currentIndexPath isEqual:indexPath]) {
-            return NO;
-        }
-        [ViewController task_2:cell indexPath:indexPath];
-        return YES;
-    } withKey:indexPath];
-    [[DWURunLoopWorkDistribution sharedRunLoopWorkDistribution] addTask:^BOOL(void) {
-        if (![cell.currentIndexPath isEqual:indexPath]) {
-            return NO;
-        }
-        [ViewController task_3:cell indexPath:indexPath];
-        return YES;
-    } withKey:indexPath];
-    [[DWURunLoopWorkDistribution sharedRunLoopWorkDistribution] addTask:^BOOL(void) {
-        if (![cell.currentIndexPath isEqual:indexPath]) {
-            return NO;
-        }
-        [ViewController task_4:cell indexPath:indexPath];
-        return YES;
-    } withKey:indexPath];
-    return cell;
-}
-
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     return CELL_HEIGHT;
 }
 
 
-- (void)loadView {
-    self.view = [UIView new];
-    self.exampleTableView = [UITableView new];
-    self.exampleTableView.delegate = self;
-    self.exampleTableView.dataSource = self;
-    [self.view addSubview:self.exampleTableView];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    self.exampleTableView.frame = self.view.bounds;
-}
-
-- (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    [self.exampleTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:IDENTIFIER];
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
 
 @end
