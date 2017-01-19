@@ -1,48 +1,67 @@
-[![Build Status](https://travis-ci.org/diwu/RunLoopWorkDistribution.svg?branch=master)](https://travis-ci.org/diwu/RunLoopWorkDistribution)
+简书地址:http://www.jianshu.com/p/2db318d68e7e
 
-![][demo]
-##iOS Fast Scrolling with RunLoop Work Distribution
+###这次主要讲的Runloop的实际应用,基础的内容就不在这介绍了,详细的文章可以查看[深入理解RunLoop](http://blog.ibireme.com/2015/05/18/runloop/)
 
-* Go to work when UI thread gets idle. Step aside when UI thread gets busy.
-* If deployed properly, it could:
-	* Delay heavy tasks on the UI thread as late as possible.
-	* Preload heavy tasks as soon as the UI thread enters its idling mode.
-	* Allow you to distribute a heavy task as multiple smaller tasks, thus less blocking when UI thread suddenly gets busy again.
-* 100% thread safe. Always runs on the UI thread.
+![RunLoop_1.png](http://upload-images.jianshu.io/upload_images/3258209-19e2888899adddd6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-##What is A RunLoop?
-RunLoop is a `while(YES){...}` loop that lives within your app's UI thread. It handles all kinds of events when your app is busy, while sleeps like a baby when there's nothing to do, until the next event wakes it up.
+RunLoop 内部的逻辑大致就是上图的这样.
+主线程中执行事件如滑动事件触摸事件等等都在3~5中执行,如果我们将其他大量的操作都放其中肯定会导致界面卡顿.
+其实我们也可以将一些操作放在子线程中,需要渲染时再回到线程渲染效果也是可以的.
+##好吧,现在开始正式介绍实现的方法:
 
-##Not All RunLoop Passes are Created Equal
-A RunLoop repeats itself as individual passes. However, not all passes are created equal. High priority passes take over when your app is tracking finger movements, while low priority passes begin to run when scrolling comes to an end and the metal has spare time to work on low priority tasks such as processing networking data.
+![Snip20170119_40.png](http://upload-images.jianshu.io/upload_images/3258209-37e37530ba26617a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-Because the high priority passes are often filled with critical time sensitive tasks. We don't want to interfere with that. So here in this project we are only working in those low priority passes. Focusing on a single type of passes also gives us one huge advantage: all tasks we submit to this type of passes are guaranteed to run on a first-in-first-out sequential basis.
+因为runloop相当于一个while循环的东西,每当事件都处理完之后就进入休眠状态,当有新的任务加入才会重新唤醒,这就是我们需要利用的地方,runloop进入7之后说明当前所有的事件都已经结束了,所以在这个时候执行我们的需要的任务就不会影响到之前任务的刷新.
+因为苹果提供了监听runloop状态的方法,所以我可以通过监听实现
+####下面的代码只是给大家一个思路,具体实现可以去下载Demo
+* 第一步添加runloop监听
+```
+static void _registerObserver(CFOptionFlags activities, CFRunLoopObserverRef observer, CFIndex order, CFStringRef mode, void *info, CFRunLoopObserverCallBack callback) {
+    CFRunLoopRef runLoop = CFRunLoopGetCurrent();
+    CFRunLoopObserverContext context = {
+        0,
+        info,
+        &CFRetain,
+        &CFRelease,
+        NULL
+    };
+    observer = CFRunLoopObserverCreate(     NULL,
+                                            activities,
+                                            YES,
+                                            order,
+                                            callback,
+                                            &context);
+    CFRunLoopAddObserver(runLoop, observer, mode);
+    CFRelease(observer);
+}
+```
+* 苹果提供了一下的监听状态,我们可以选择kCFRunLoopBeforeWaiting当正要进入休眠状态时执行,这样不需要重新唤醒
+```
+/* Run Loop Observer Activities */
+typedef CF_OPTIONS(CFOptionFlags, CFRunLoopActivity) {
+    kCFRunLoopEntry = (1UL << 0),
+    kCFRunLoopBeforeTimers = (1UL << 1),
+    kCFRunLoopBeforeSources = (1UL << 2),
+    = (1UL << 5),
+    kCFRunLoopAfterWaiting = (1UL << 6),
+    kCFRunLoopExit = (1UL << 7),
+    kCFRunLoopAllActivities = 0x0FFFFFFFU
+};
+```
 
-##Why not Simply Multi-threading?
-Too many times when we are optimizing cell drawing code in our `cellForRow:` method, we find ourselves buried under a bunch of UIKit APIs that are in no way thread safe. Even worse, some of them could easily block the main thread for one or more precious milliseconds. As facebook AsyncDisplayKit teaches us, "Your code usually has less than ten milliseconds to run before it causes a frame drop". Oops.
+*  这里就是我的得到监听结果之后回调的方法,我们可以将需要执行的代码写到block中,然后加入数组中,每次runloop执行结束就执行一个
 
-##Why Distributing the Work Load?
-So here we are executing low priority tasks on the UI thread while the UI thread is free and is about to sleep, so why not dumping those tasks all at once. The UI thread is not busy at that specific moment anyway.
+```
+static void _runLoopWorkDistributionCallback(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)
+{
+  这里就是我的得到监听结果之后回调的方法,我们可以将需要执行的代码写到block中,然后加入数组中,每次runloop执行结束就执行一个
+}
+```
 
-Here's why: The next RunLoop pass, be it high or low priority, will never start unless the previous one hits the finishing line. As a result, if we dump too much work into the current low priority pass, and suddenly the high priority pass needs to take over (for example, touch events detected), the high priority pass will have to wait for the low priority task to finish before any touch events could be served. And that's when you notice the glitches.
+#如解释有误欢迎指正~
+#特此鸣谢diwu大神
+思路基本照搬大神的Demo,[diwu大神的github](https://github.com/diwu)大神虽然是中国人但是英文太好,文档都是英文的,而且demo没有写注解,特地写了一份带中文注解的库,随带稍微优化了性能大家也可以看看的我优化后的库喜欢就给个Star呗
+[优化+注解后的库:https://github.com/CZXBigBrother/MCRunLoopWork,也保留了原来的库](https://github.com/CZXBigBrother/MCRunLoopWork)
 
-If instead we slice our one big low priority task into smaller pieces, things would look much much different. Whenever high priority passes need to take over, they won't wait for long because every low priority task is now smaller and will be finished in no time. Hence the "Step aside when UI thread gets busy." 
-
-##Example
-Along with the source code there's an contrived example illustrating the technique. In the example there's a heavy task that loads and draws 3 big JPG files into the cell's contentView whenever a new cell goes onto the screen. If we follow the convention and load and draw the images right inside the `cellForRow:` callback, glitches will ensue, since loading and drawing each image takes quite some time even in a simulator. 
-
-So instead of doing it the old way, we slice our big task into 3 smaller ones, each loading and drawing 1 image. Then we submit the 3 tasks into the low priority tasks queue with the help of `DWURunLoopWorkDistribution`. Running the example, we can see that glitches are much less frequent now. Besides, instead of loading and drawing images for every indexPath that comes and goes during scrolling, only certain indexPaths now get to do the work, making the whole scrolling process more efficient.
-
-##Installation
-
-Simply copy and paste `DWURunLoopWorkDistribution.{h,m}` into your project. Or, if you prefer, add the following line into your Podfile.
-
-`pod 'DWURunLoopWorkDistribution'` 
-
-##Usage
-
-You can submit tasks by calling `addTask:withKey:`. In the case of `cellForRow:`, the key will be the `NSIndexPath` instance of that specific cell.
-
-Since cells are regularly reused within a given tableView, be sure to set the `currentIndexPath` property of your cell and check its value against the indexPath captured by the task block to make sure you are not executing a task that should be abandoned. Cannot find the `currentIndexPath` property anywhere in the document? No worry, it's not there because it's not from Apple. It's a dynamic property injected into every UITableViewCell instance during runtime by `DWURunLoopWorkDistribution`.
-
-[demo]: https://raw.githubusercontent.com/diwu/ui-markdown-store/master/DWURunLoopWorkDistribution_demo.gif
+>DWURunLoopWorkDistribution 是大神原来写的类
+MCRunloopWork 这是我优化之后的类,添加了一些方法和配置选项,方便在更多场景下使用
