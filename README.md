@@ -65,3 +65,37 @@ static void _runLoopWorkDistributionCallback(CFRunLoopObserverRef observer, CFRu
 
 >DWURunLoopWorkDistribution 是大神原来写的类
 MCRunloopWork 这是我优化之后的类,添加了一些方法和配置选项,方便在更多场景下使用
+
+
+```
+/*
+ *  初始化
+ */
++ (instancetype)sharedRunLoopWork;
+/*
+ *  监听Runloop的状态属性,默认MCRunLoopBeforeWaiting
+ */
+@property (assign, nonatomic) MCRunLoopFlag runLoopflag;
+/*
+ *  监听Runloop的模式 
+ *  默认MCRunLoopDefaultMode(kCFRunLoopDefaultMode) 系统渲染优先,当系统渲染结束才能执行我们需要的事件
+ *  MCRunLoopCommonMode(kCFRunLoopCommonModes) 将timer插入runloop顶层提高优先级(使用后切勿将耗时操作加入任务,慎用)
+ */
+@property (assign, nonatomic) MCRunlopMode runlopMode;
+/*
+ *  开始监听Runloop
+ */
+- (void)start;
+/*
+ *  停止监听Runloop
+ */
+- (void)stop;
+/*
+ *  添加需要在Runloop中执行的任务
+ */
+- (void)addTask:(MCRunLoopWorkUnit)unit withKey:(id)key;
+/*
+ *  删除所有的队列
+ */
+- (void)removeAllTasks;
+```
