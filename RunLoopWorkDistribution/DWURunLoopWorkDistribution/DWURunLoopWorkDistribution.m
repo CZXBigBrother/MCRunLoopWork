@@ -29,7 +29,7 @@
 }
 
 - (void)addTask:(DWURunLoopWorkDistributionUnit)unit withKey:(id)key{
-    //将执行任务的block添加到任务列表
+    //将执行任务的block添加到任务列表,key用来标示每个任务,防止在任务目标被重用或者已经被销货的情况下重复执行
     [self.tasks addObject:unit];
     [self.tasksKeys addObject:key];
     if (self.tasks.count > self.maximumQueueLength) {

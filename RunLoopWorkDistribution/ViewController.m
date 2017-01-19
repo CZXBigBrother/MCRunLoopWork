@@ -96,6 +96,7 @@ static CGFloat CELL_HEIGHT = 135.f;
     cell.currentIndexPath = indexPath;
     [ViewController task_5:cell indexPath:indexPath];
     [ViewController task_1:cell indexPath:indexPath];
+    //任务通过block添加到队列
     [[DWURunLoopWorkDistribution sharedRunLoopWorkDistribution] addTask:^BOOL(void) {
         if (![cell.currentIndexPath isEqual:indexPath]) {
             return NO;
