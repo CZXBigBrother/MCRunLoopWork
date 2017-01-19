@@ -29,9 +29,11 @@
 }
 
 - (void)addTask:(DWURunLoopWorkDistributionUnit)unit withKey:(id)key{
+    //将执行任务的block添加到任务列表
     [self.tasks addObject:unit];
     [self.tasksKeys addObject:key];
     if (self.tasks.count > self.maximumQueueLength) {
+        //任务超过最大上线之后,删除最早的任务
         [self.tasks removeObjectAtIndex:0];
         [self.tasksKeys removeObjectAtIndex:0];
     }
@@ -66,7 +68,7 @@
     static CFRunLoopObserverRef defaultModeObserver;
     _registerObserver(kCFRunLoopBeforeWaiting, defaultModeObserver, NSIntegerMax - 999, kCFRunLoopDefaultMode, (__bridge void *)runLoopWorkDistribution, &_defaultModeRunLoopWorkDistributionCallback);
 }
-
+//添加runloop通知
 static void _registerObserver(CFOptionFlags activities, CFRunLoopObserverRef observer, CFIndex order, CFStringRef mode, void *info, CFRunLoopObserverCallBack callback) {
     CFRunLoopRef runLoop = CFRunLoopGetCurrent();
     CFRunLoopObserverContext context = {
@@ -85,7 +87,7 @@ static void _registerObserver(CFOptionFlags activities, CFRunLoopObserverRef obs
     CFRunLoopAddObserver(runLoop, observer, mode);
     CFRelease(observer);
 }
-
+//回调方法
 static void _runLoopWorkDistributionCallback(CFRunLoopObserverRef observer, CFRunLoopActivity activity, void *info)
 {
     DWURunLoopWorkDistribution *runLoopWorkDistribution = (__bridge DWURunLoopWorkDistribution *)info;
@@ -94,6 +96,7 @@ static void _runLoopWorkDistributionCallback(CFRunLoopObserverRef observer, CFRu
     }
     BOOL result = NO;
     while (result == NO && runLoopWorkDistribution.tasks.count) {
+        //获取列表中第一个任务block 执行后删除
         DWURunLoopWorkDistributionUnit unit  = runLoopWorkDistribution.tasks.firstObject;
         result = unit();
         [runLoopWorkDistribution.tasks removeObjectAtIndex:0];
