@@ -60,13 +60,12 @@ static void _runLoopWorkDistributionCallback(CFRunLoopObserverRef observer, CFRu
 
 # 如解释有误欢迎指正~
 # 特此鸣谢diwu大神
-思路基本照搬大神的Demo,[diwu大神的github](https://github.com/diwu)大神虽然是中国人但是英文太好,文档都是英文的,而且demo没有写注解,特地写了一份带中文注解的库,随带稍微优化了性能大家也可以看看的我优化后的库喜欢就给个Star呗
+思路基本照搬大神的Demo,[diwu大神的github](https://github.com/diwu)稍微优化了性能大家也可以看看的我优化后的库喜欢就给个Star呗
 [优化+注解后的库:https://github.com/CZXBigBrother/MCRunLoopWork,也保留了原来的库](https://github.com/CZXBigBrother/MCRunLoopWork)
 
 >DWURunLoopWorkDistribution 是大神原来写的类
 MCRunloopWork 这是我优化之后的类,添加了一些方法和配置选项,方便在更多场景下使用
-
-
+## Usage
 ```
 /*
  *  初始化
